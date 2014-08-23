@@ -2,6 +2,7 @@ package com.Acrobot.Breeze.Utils;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -33,12 +34,22 @@ public class BlockUtil {
     }
 
     /**
+     * Checks if the InventoryHolder is a chest
+     *
+     * @param holder Inventory holder to check
+     * @return Is this holder a chest?
+     */
+    public static boolean isChest(InventoryHolder holder) {
+        return holder instanceof Chest || holder instanceof DoubleChest;
+    }
+
+    /**
      * Gets the block to which the sign is attached
      *
      * @param sign Sign which is attached
      * @return Block to which the sign is attached
      */
-    public static Block getAttachedFace(Sign sign) {
+    public static Block getAttachedBlock(Sign sign) {
         return sign.getBlock().getRelative(((Attachable) sign.getData()).getAttachedFace());
     }
 

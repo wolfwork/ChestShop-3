@@ -3,6 +3,7 @@ package com.Acrobot.ChestShop;
 import com.Acrobot.Breeze.Configuration.Configuration;
 import com.Acrobot.ChestShop.Commands.Give;
 import com.Acrobot.ChestShop.Commands.ItemInfo;
+import com.Acrobot.ChestShop.Commands.Toggle;
 import com.Acrobot.ChestShop.Commands.Version;
 import com.Acrobot.ChestShop.Configuration.Messages;
 import com.Acrobot.ChestShop.Configuration.Properties;
@@ -34,10 +35,18 @@ import com.Acrobot.ChestShop.Listeners.ShopRemoval.ShopRemovalLogger;
 import com.Acrobot.ChestShop.Logging.FileFormatter;
 import com.Acrobot.ChestShop.Metadata.ItemDatabase;
 import com.Acrobot.ChestShop.Signs.RestrictedSign;
-import com.Acrobot.ChestShop.Utils.uName;
+import com.Acrobot.ChestShop.UUIDs.NameManager;
+import com.Acrobot.ChestShop.Updater.Updater;
 import com.avaje.ebean.EbeanServer;
 import com.lennardf1989.bukkitex.Database;
-import com.nijikokun.register.payment.forChestShop.Methods;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.filter.AbstractFilter;
+import org.apache.logging.log4j.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -79,15 +88,21 @@ public class ChestShop extends JavaPlugin {
         description = getDescription();
         server = getServer();
 
+        if (server.getBukkitVersion().contains("1.7.2") || server.getBukkitVersion().contains("1.7.5")) {
+            for (int i = 0; i < 5; ++i) {
+                logger.log(java.util.logging.Level.SEVERE, "This version of plugin does not work with Minecraft 1.7.5 or lower!");
+            }
+        }
+
         Configuration.pairFileAndClass(loadFile("config.yml"), Properties.class);
         Configuration.pairFileAndClass(loadFile("local.yml"), Messages.class);
 
+        turnOffDatabaseLogging();
+        handleMigrations();
+
         itemDatabase = new ItemDatabase();
 
-        uName.file = loadFile("longName.storage");
-        uName.load();
-
-        Methods.setPreferred(Properties.PREFERRED_ECONOMY_PLUGIN);
+        NameManager.load();
 
         Dependencies.loadPlugins();
 
@@ -119,8 +134,75 @@ public class ChestShop extends JavaPlugin {
         getCommand("iteminfo").setExecutor(new ItemInfo());
         getCommand("csVersion").setExecutor(new Version());
         getCommand("csGive").setExecutor(new Give());
+        getCommand("cstoggle").setExecutor(new Toggle());
 
         startStatistics();
+        startUpdater();
+    }
+
+    private void turnOffDatabaseLogging() {
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
+        LoggerConfig loggerConfig = config.getLoggerConfig("");
+
+        loggerConfig.addFilter(new AbstractFilter() {
+            @Override
+            public Result filter(org.apache.logging.log4j.core.Logger logger, Level level, Marker marker, String msg, Object... params) {
+                return filter(logger.getName(), level);
+            }
+
+            @Override
+            public Result filter(org.apache.logging.log4j.core.Logger logger, Level level, Marker marker, Object msg, Throwable t) {
+                return filter(logger.getName(), level);
+            }
+
+            @Override
+            public Result filter(org.apache.logging.log4j.core.Logger logger, Level level, Marker marker, Message msg, Throwable t) {
+                return filter(logger.getName(), level);
+            }
+
+            @Override
+            public Result filter(LogEvent event) {
+                return filter(event.getLoggerName(), event.getLevel());
+            }
+
+            private Result filter(String classname, Level level) {
+                if (level.isAtLeastAsSpecificAs(Level.ERROR) && !classname.contains("SqliteDatabaseType")) {
+                    return Result.NEUTRAL;
+                }
+
+                if (classname.contains("SqliteDatabaseType") || classname.contains("TableUtils")) {
+                    return Result.DENY;
+                } else {
+                    return Result.NEUTRAL;
+                }
+            }
+        });
+    }
+
+    private final int CURRENT_DATABASE_VERSION = 1;
+
+    private void handleMigrations() {
+        File versionFile = loadFile("version");
+        YamlConfiguration previousVersion = YamlConfiguration.loadConfiguration(versionFile);
+
+        if (previousVersion.get("version") == null) {
+            previousVersion.set("version", CURRENT_DATABASE_VERSION);
+
+            try {
+                previousVersion.save(versionFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int lastVersion = previousVersion.getInt("version");
+
+        switch (lastVersion) {
+            case CURRENT_DATABASE_VERSION:
+            default:
+                //do nothing
+        }
     }
 
     public static File loadFile(String string) {
@@ -160,6 +242,8 @@ public class ChestShop extends JavaPlugin {
     public void onDisable() {
         getServer().getScheduler().cancelTasks(this);
 
+        Toggle.clearToggledPlayers();
+
         if (handler != null) {
             handler.close();
             getLogger().removeHandler(handler);
@@ -186,12 +270,12 @@ public class ChestShop extends JavaPlugin {
         registerEvent(new PlayerConnect());
         registerEvent(new PlayerInteract());
         registerEvent(new PlayerInventory());
+        registerEvent(new PlayerLeave());
         registerEvent(new PlayerTeleport());
 
         registerEvent(new ItemInfoListener());
 
         registerEvent(new RestrictedSign());
-        registerEvent(new ShortNameSaver());
 
         if (!Properties.TURN_OFF_HOPPER_PROTECTION) {
             registerEvent(new ItemMoveListener());
@@ -276,6 +360,16 @@ public class ChestShop extends JavaPlugin {
         } catch (IOException ex) {
             ChestShop.getBukkitLogger().severe("There was an error while submitting statistics.");
         }
+    }
+
+    private static final int PROJECT_BUKKITDEV_ID = 31263;
+
+    private void startUpdater() {
+        if (Properties.TURN_OFF_UPDATES) {
+            return;
+        }
+
+        new Updater(this, PROJECT_BUKKITDEV_ID, this.getFile(), Updater.UpdateType.DEFAULT, true);
     }
 
     /////////////////////   DATABASE    STUFF      ////////////////////////////////

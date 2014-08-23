@@ -6,6 +6,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * Checks if the account can hold the amount of currency
@@ -18,17 +19,17 @@ public class CurrencyHoldEvent extends Event {
     boolean canHold = true;
 
     private BigDecimal amount;
-    private String account;
+    private UUID account;
     private World world;
 
-    public CurrencyHoldEvent(BigDecimal amount, String account, World world) {
+    public CurrencyHoldEvent(BigDecimal amount, UUID account, World world) {
         this.amount = amount;
         this.account = account;
         this.world = world;
     }
 
     public CurrencyHoldEvent(BigDecimal amount, Player target) {
-        this(amount, target.getName(), target.getWorld());
+        this(amount, target.getUniqueId(), target.getWorld());
     }
 
     /**
@@ -91,7 +92,7 @@ public class CurrencyHoldEvent extends Event {
     /**
      * @return Account that is checked
      */
-    public String getAccount() {
+    public UUID getAccount() {
         return account;
     }
 
@@ -100,7 +101,7 @@ public class CurrencyHoldEvent extends Event {
      *
      * @param account Account name
      */
-    public void setAccount(String account) {
+    public void setAccount(UUID account) {
         this.account = account;
     }
 

@@ -3,13 +3,15 @@ package com.Acrobot.ChestShop.Signs;
 import com.Acrobot.Breeze.Utils.BlockUtil;
 import com.Acrobot.ChestShop.Configuration.Properties;
 import com.Acrobot.ChestShop.Containers.AdminInventory;
+import com.Acrobot.ChestShop.UUIDs.NameManager;
 import com.Acrobot.ChestShop.Utils.uBlock;
-import com.Acrobot.ChestShop.Utils.uName;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 
 import java.util.regex.Pattern;
 
@@ -26,7 +28,7 @@ public class ChestShopSign {
             Pattern.compile("^?[\\w -.]*$"),
             Pattern.compile("^[1-9][0-9]*$"),
             Pattern.compile("(?i)^[\\d.bs(free) :]+$"),
-            Pattern.compile("^[\\w #:-]+$")
+            Pattern.compile("^[\\w? #:-]+$")
     };
 
     public static boolean isAdminShop(Inventory ownerInventory) {
@@ -61,11 +63,25 @@ public class ChestShopSign {
         return uBlock.getConnectedSign((Chest) chest.getState()) != null;
     }
 
+    public static boolean isShopChest(InventoryHolder holder) {
+        if (!BlockUtil.isChest(holder)) {
+            return false;
+        }
+
+        if (holder instanceof DoubleChest) {
+            return isShopChest(((DoubleChest) holder).getLocation().getBlock());
+        } else if (holder instanceof Chest) {
+            return isShopChest(((Chest) holder).getBlock());
+        } else {
+            return false;
+        }
+    }
+
     public static boolean canAccess(Player player, Sign sign) {
         if (player == null) return false;
         if (sign == null) return true;
 
-        return uName.canUseName(player, sign.getLine(0));
+        return NameManager.canUseName(player, sign.getLine(NAME_LINE));
     }
 
     public static boolean isValidPreparedSign(String[] lines) {

@@ -6,7 +6,7 @@
 
     <groupId>com.acrobot.chestshop</groupId>
     <artifactId>chestshop</artifactId>
-    <version>3.7.2</version>
+    <version>3.7.17</version>
     <description>Chest-and-sign shop plugin for Bukkit</description>
 
     <scm>
@@ -30,7 +30,11 @@
         </repository>
         <repository>
             <id>vault-repo</id>
-            <url>http://ci.herocraftonline.com/plugin/repository/everything</url>
+            <url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
+        </repository>
+        <repository>
+            <id>heroes-repo</id>
+            <url>http://nexus.theyeticave.net/content/repositories/public/</url>
         </repository>
         <repository>
             <id>local_repo</id>
@@ -47,9 +51,20 @@
         </dependency>
 
         <dependency>
+            <groupId>com.j256.ormlite</groupId>
+            <artifactId>ormlite-jdbc</artifactId>
+            <version>4.48</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.0-beta9</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.6.4-R2.0</version>
+            <version>1.7.9-R0.2</version>
         </dependency>
         <dependency>
             <groupId>org.mcstats.bukkit</groupId>
@@ -59,22 +74,7 @@
         <dependency>
             <groupId>net.milkbowl.vault</groupId>
             <artifactId>Vault</artifactId>
-            <version>1.2.27</version>
-        </dependency>
-        <dependency>
-            <groupId>com.iCo6</groupId>
-            <artifactId>iConomy6</artifactId>
-            <version>6.0.10b</version>
-        </dependency>
-        <dependency>
-            <groupId>com.iConomy</groupId>
-            <artifactId>iConomy5</artifactId>
-            <version>5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>cosine.boseconomy</groupId>
-            <artifactId>boseconomy</artifactId>
-            <version>0.7.0</version>
+            <version>1.4.1</version>
         </dependency>
         <dependency>
             <groupId>info.somethingodd</groupId>
@@ -83,8 +83,8 @@
         </dependency>
         <dependency>
             <groupId>com.herocraftonline.heroes</groupId>
-            <artifactId>heroes</artifactId>
-            <version>1.5.2-dev-b1705</version>
+            <artifactId>Heroes</artifactId>
+            <version>1.5.5.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.griefcraft.lwc</groupId>
@@ -112,9 +112,9 @@
             <version>1.7.9</version>
         </dependency>
         <dependency>
-            <groupId>com.bekvon.bukkit.residence</groupId>
+            <groupId>net.t00thpick1</groupId>
             <artifactId>residence</artifactId>
-            <version>2.6.6.3</version>
+            <version>3.0.0q-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -128,6 +128,14 @@
                     <finalName>ChestShop</finalName>
                 </configuration>
             </plugin>
+	   <plugin>
+	         <artifactId>maven-compiler-plugin</artifactId>
+		<version>2.3.2</version>
+		<configuration>
+			<source>1.6</source>
+			<target>1.6</target>
+		</configuration>
+	   </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -142,12 +150,22 @@
                             <artifactSet>
                                 <includes>
                                     <include>org.mcstats.bukkit</include>
+                                    <include>net.gravitydevelopment.updater</include>
+                                    <include>com.j256.ormlite</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
                                 <relocation>
                                     <pattern>org.mcstats</pattern>
                                     <shadedPattern>com.Acrobot.ChestShop</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>net.gravitydevelopment.updater</pattern>
+                                    <shadedPattern>com.Acrobot.ChestShop.Updater</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.j256.ormlite</pattern>
+                                    <shadedPattern>com.Acrobot.ChestShop.ORMlite</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

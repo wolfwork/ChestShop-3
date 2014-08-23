@@ -7,8 +7,8 @@ import com.Acrobot.Breeze.Configuration.Annotations.PrecededBySpace;
  * @author Acrobot
  */
 public class Properties {
-    @ConfigurationComment("(When not using Vault) Preferred economy plugin to use (iConomy/BOSEconomy/Essentials).")
-    public static String PREFERRED_ECONOMY_PLUGIN = "";
+    @ConfigurationComment("Do you want to turn off the automatic updates of ChestShop?")
+    public static boolean TURN_OFF_UPDATES = false;
 
     @PrecededBySpace
     @ConfigurationComment("(In 1/1000th of a second) How often can a player use the shop sign?")
@@ -75,6 +75,9 @@ public class Properties {
     @ConfigurationComment("Can shops be used even when the seller doesn't have enough items? (The price will be scaled adequatly to the item amount)")
     public static boolean ALLOW_PARTIAL_TRANSACTIONS = true;
 
+    @ConfigurationComment("Can '?' be put in place of item name in order for the sign to be auto-filled?")
+    public static boolean ALLOW_AUTO_ITEM_FILL = true;
+
     @PrecededBySpace
     @ConfigurationComment("Do you want to show \"Out of stock\" messages?")
     public static boolean SHOW_MESSAGE_OUT_OF_STOCK = true;
@@ -122,6 +125,9 @@ public class Properties {
 
     @ConfigurationComment("Do you want to protect shop signs with LWC?")
     public static boolean PROTECT_SIGN_WITH_LWC = false;
+
+    @ConfigurationComment("Should the chest's LWC protection be removed once the shop sign is destroyed? ")
+    public static boolean REMOVE_LWC_PROTECTION_AUTOMATICALLY = true;
 
     @PrecededBySpace
     @ConfigurationComment("If true, plugin will generate shop statistics webpage.")

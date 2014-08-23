@@ -10,8 +10,8 @@ import com.Acrobot.ChestShop.Permission;
 import com.Acrobot.ChestShop.Plugins.ChestShop;
 import com.Acrobot.ChestShop.Security;
 import com.Acrobot.ChestShop.Signs.ChestShopSign;
+import com.Acrobot.ChestShop.UUIDs.NameManager;
 import com.Acrobot.ChestShop.Utils.uBlock;
-import com.Acrobot.ChestShop.Utils.uName;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -28,6 +28,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.UUID;
+
 import static com.Acrobot.Breeze.Utils.BlockUtil.isChest;
 import static com.Acrobot.Breeze.Utils.BlockUtil.isSign;
 import static com.Acrobot.ChestShop.Events.TransactionEvent.TransactionType;
@@ -42,7 +44,7 @@ import static org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK;
  */
 public class PlayerInteract implements Listener {
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public static void onInteract(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
 
@@ -115,8 +117,14 @@ public class PlayerInteract implements Listener {
         String prices = sign.getLine(PRICE_LINE);
         String material = sign.getLine(ITEM_LINE);
 
-        String ownerName = uName.getName(name);
-        OfflinePlayer owner = Bukkit.getOfflinePlayer(ownerName);
+        String ownerName = NameManager.getFullUsername(name);
+        UUID uuid = NameManager.getUUID(ownerName);
+
+        if (uuid == null) {
+            return null;
+        }
+
+        OfflinePlayer owner = Bukkit.getOfflinePlayer(uuid);
 
         Action buy = Properties.REVERSE_BUTTONS ? LEFT_CLICK_BLOCK : RIGHT_CLICK_BLOCK;
         double price = (action == buy ? PriceUtil.getBuyPrice(prices) : PriceUtil.getSellPrice(prices));

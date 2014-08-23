@@ -6,6 +6,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * Represents an addition of goods to entity
@@ -18,17 +19,17 @@ public class CurrencyAddEvent extends Event {
     boolean added;
 
     private BigDecimal amount;
-    private String target;
+    private UUID target;
     private World world;
 
-    public CurrencyAddEvent(BigDecimal amount, String target, World world) {
+    public CurrencyAddEvent(BigDecimal amount, UUID target, World world) {
         this.amount = amount;
         this.target = target;
         this.world = world;
     }
 
     public CurrencyAddEvent(BigDecimal amount, Player target) {
-        this(amount, target.getName(), target.getWorld());
+        this(amount, target.getUniqueId(), target.getWorld());
     }
 
     /**
@@ -91,7 +92,7 @@ public class CurrencyAddEvent extends Event {
     /**
      * @return Account from which the currency is subtracted
      */
-    public String getTarget() {
+    public UUID getTarget() {
         return target;
     }
 

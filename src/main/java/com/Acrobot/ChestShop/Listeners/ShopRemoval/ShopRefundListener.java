@@ -7,12 +7,13 @@ import com.Acrobot.ChestShop.Economy.Economy;
 import com.Acrobot.ChestShop.Events.Economy.CurrencyAddEvent;
 import com.Acrobot.ChestShop.Events.ShopDestroyedEvent;
 import com.Acrobot.ChestShop.Permission;
-import com.Acrobot.ChestShop.Utils.uName;
+import com.Acrobot.ChestShop.UUIDs.NameManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static com.Acrobot.ChestShop.Permission.NOFEE;
 import static com.Acrobot.ChestShop.Signs.ChestShopSign.NAME_LINE;
@@ -29,7 +30,8 @@ public class ShopRefundListener implements Listener {
             return;
         }
 
-        String owner = uName.getName(event.getSign().getLine(NAME_LINE));
+        String ownerName = NameManager.getFullUsername(event.getSign().getLine(NAME_LINE));
+        UUID owner = NameManager.getUUID(ownerName);
 
         CurrencyAddEvent currencyEvent = new CurrencyAddEvent(BigDecimal.valueOf(refundPrice), owner, event.getSign().getWorld());
         ChestShop.callEvent(currencyEvent);

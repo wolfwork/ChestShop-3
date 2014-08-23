@@ -10,7 +10,6 @@ import com.Acrobot.ChestShop.Security;
 import com.griefcraft.lwc.LWC;
 import com.griefcraft.model.Protection;
 import com.griefcraft.scripting.event.LWCProtectionRegisterEvent;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
@@ -36,12 +35,12 @@ public class LightweightChestProtection implements Listener {
         Chest connectedChest = event.getChest();
 
         if (Properties.PROTECT_SIGN_WITH_LWC) {
-            if (!Security.protect(player.getName(), sign.getBlock())) {
+            if (!Security.protect(player, sign.getBlock())) {
                 player.sendMessage(Messages.prefix(Messages.NOT_ENOUGH_PROTECTIONS));
             }
         }
 
-        if (Properties.PROTECT_CHEST_WITH_LWC && connectedChest != null && Security.protect(player.getName(), connectedChest.getBlock())) {
+        if (Properties.PROTECT_CHEST_WITH_LWC && connectedChest != null && Security.protect(player, connectedChest.getBlock())) {
             player.sendMessage(Messages.prefix(Messages.PROTECTED_SHOP));
         }
     }
@@ -73,7 +72,7 @@ public class LightweightChestProtection implements Listener {
         }
 
         Block block = event.getBlock();
-        Player player = Bukkit.getPlayerExact(event.getName());
+        Player player = event.getPlayer();
 
         if (player == null) {
             return;
@@ -99,7 +98,7 @@ public class LightweightChestProtection implements Listener {
             return;
         }
 
-        Protection protection = lwc.getPhysicalDatabase().registerProtection(block.getTypeId(), Protection.Type.PRIVATE, worldName, event.getName(), "", x, y, z);
+        Protection protection = lwc.getPhysicalDatabase().registerProtection(block.getTypeId(), Protection.Type.PRIVATE, worldName, player.getName(), "", x, y, z);
 
         if (protection != null) {
             event.setProtected(true);
@@ -114,7 +113,7 @@ public class LightweightChestProtection implements Listener {
             signProtection.remove();
         }
 
-        if (event.getChest() == null) {
+        if (event.getChest() == null || !Properties.REMOVE_LWC_PROTECTION_AUTOMATICALLY) {
             return;
         }
 

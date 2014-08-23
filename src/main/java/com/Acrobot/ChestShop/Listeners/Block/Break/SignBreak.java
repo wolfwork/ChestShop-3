@@ -18,10 +18,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.material.Directional;
 import org.bukkit.material.PistonBaseMaterial;
@@ -33,12 +30,12 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.Acrobot.Breeze.Utils.BlockUtil.getAttachedFace;
+import static com.Acrobot.Breeze.Utils.BlockUtil.getAttachedBlock;
 import static com.Acrobot.Breeze.Utils.BlockUtil.isSign;
 import static com.Acrobot.ChestShop.Permission.ADMIN;
 import static com.Acrobot.ChestShop.Permission.MOD;
 import static com.Acrobot.ChestShop.Signs.ChestShopSign.NAME_LINE;
-import static com.Acrobot.ChestShop.Utils.uName.canUseName;
+import static com.Acrobot.ChestShop.UUIDs.NameManager.canUseName;
 
 /**
  * @author Acrobot
@@ -56,7 +53,7 @@ public class SignBreak implements Listener {
         }
 
         Sign sign = (Sign) block.getState();
-        Block attachedBlock = BlockUtil.getAttachedFace(sign);
+        Block attachedBlock = BlockUtil.getAttachedBlock(sign);
 
         if (attachedBlock.getType() == Material.AIR && ChestShopSign.isValid(sign)) {
             List <MetadataValue> values = block.getMetadata(METADATA_NAME);
@@ -111,6 +108,13 @@ public class SignBreak implements Listener {
                 event.setCancelled(true);
                 return;
             }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public static void onIgnite(BlockBurnEvent event) {
+        if (!canBlockBeBroken(event.getBlock(), null)) {
+            event.setCancelled(true);
         }
     }
 
@@ -183,7 +187,7 @@ public class SignBreak implements Listener {
 
                 Sign sign = (Sign) relative.getState();
 
-                if (getAttachedFace(sign).equals(block)) {
+                if (getAttachedBlock(sign).equals(block)) {
                     attachedSigns.add(sign);
                 }
             }
